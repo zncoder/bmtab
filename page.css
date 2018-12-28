@@ -1,0 +1,12 @@
+ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+ul li:nth-child(2n) {
+		background: cyan;
+}
+
+.close-sym:hover {
+    background-color: lightsalmon;
+}
