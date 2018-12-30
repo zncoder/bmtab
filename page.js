@@ -4,6 +4,7 @@ function deleteEntry(id) {
 	let li = sel("#li-"+id);
 	li.parentNode.removeChild(li);
 	chrome.bookmarks.remove(id);
+	chrome.runtime.sendMessage({action: "bm-removed"});
 }
 
 const liTmpl = '<li id="li-{id}">\n\
