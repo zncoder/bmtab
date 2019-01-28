@@ -1,6 +1,8 @@
 const bmtabTitle = "bmtab-bn4yaq";
+const historyTitle = "history-bn4yaq";
 const baseMenuId = 100;
 let folderId;
+let historyId;
 
 function showBmtabPage() {
 	chrome.tabs.create({"url": "/page.html"});
@@ -21,19 +23,52 @@ function bmTab() {
 }
 
 function initBmtab() {
-	// create bmtab bookmark folder
-	chrome.bookmarks.search(
-		{title: bmtabTitle},
-		items => {
-			if (items.length > 0) {
-				folderId = items[0].id;
-				return;
-			}
-			
-			chrome.bookmarks.create(
-				{title: bmtabTitle},
-				item => {folderId = item.id});
-		});
+	// create bmtab and history bookmark folder
+	createBmtabFolder()
+		.then(id => {
+			folderId = id;
+			return createHistoryFolder();
+		})
+		.then(id => historyId = id);
+}
+
+function createBmtabFolder() {
+	return new Promise(resolve => {
+		chrome.bookmarks.search(
+			{title: bmtabTitle},
+			items => {
+				if (items.length > 0) {
+					resolve(items[0].id);
+					return;
+				}
+				
+				chrome.bookmarks.create(
+					{title: bmtabTitle},
+					item => resolve(item.id));
+			});
+	});
+}
+
+function createHistoryFolder() {
+	return new Promise(resolve => {
+		chrome.bookmarks.getChildren(
+			folderId,
+			items => {
+				for (let x of items) {
+					if (x.title === historyTitle) {
+						resolve(x.id);
+						return;
+					}
+				}
+
+				chrome.bookmarks.create(
+					{
+						title: historyTitle,
+						parentId: folderId
+					},
+					item => resolve(item.id));
+			});
+	});
 }
 
 function getBmtabs() {
@@ -85,7 +120,7 @@ function buildMenus() {
 		.then(getBmtabs)
 		.then(x => {
 			items = x;
-			console.log("buildmenus items"); //console.log(items);
+			//console.log("buildmenus items"); console.log(items);
 		})
 		.then(() => newMenu({
 			id: "0",
