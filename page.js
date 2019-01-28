@@ -1,9 +1,10 @@
+let bg;
 let sel = x => document.querySelector(x);
 
 function deleteEntry(id) {
 	let li = sel("#li-"+id);
 	li.parentNode.removeChild(li);
-	chrome.bookmarks.remove(id);
+	bg.removeBookmark(id);
 	chrome.runtime.sendMessage({action: "bm-removed"});
 }
 
@@ -30,4 +31,7 @@ function displayEntries(items) {
 	}
 }
 
-chrome.runtime.getBackgroundPage(bg => bg.getBmtabs().then(displayEntries));
+chrome.runtime.getBackgroundPage(x => {
+	bg = x;
+	bg.getBmtabs().then(displayEntries);
+});

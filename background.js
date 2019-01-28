@@ -72,7 +72,10 @@ function createHistoryFolder() {
 }
 
 function getBmtabs() {
-	return new Promise(resolve => chrome.bookmarks.getChildren(folderId, items => resolve(items)));
+	return new Promise(resolve => chrome.bookmarks.getChildren(folderId, items => {
+		items = items.filter(x => x.id !== historyId);
+		resolve(items);
+	}));
 }
 
 function removeMenus() {
@@ -88,7 +91,20 @@ function newMenu(arg) {
 }
 
 function removeBookmark(id) {
-	return new Promise(resolve => chrome.bookmarks.remove(id, () => resolve()));
+	return new Promise(resolve => {
+		// move id to history
+		chrome.bookmarks.get(id, items => {
+			if (items.length == 0) {
+				resolve();
+				return;
+			}
+			
+			let arg = {parentId: historyId, index: 0, title: items[0].title, url: items[0].url}
+			chrome.bookmarks.create(arg, () => {
+				chrome.bookmarks.remove(id, () => resolve());
+			});
+		});
+	});
 }
 
 function handleMenu(info, tab) {
