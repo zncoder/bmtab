@@ -86,11 +86,22 @@ function removeBookmark(id) {
 			if (items.length == 0) {
 				return;
 			}
-			
+
 			let arg = {parentId: historyId, index: 0, title: items[0].title, url: items[0].url}
-			return bmDo("create", arg)
+			return dedupHistory(arg.url)
+				.then(() => bmDo("create", arg))
 				.then(() => bmDo("remove", id));
 		});
+}
+
+function dedupHistory(url) {
+	return bmDo("getChildren", historyId)
+		.then(items => {
+			return items
+				.filter(x => x.url === url)
+				.map(x => bmDo("remove", x.id));
+		})
+		.then(ps => Promise.all(ps));
 }
 
 function handleMenu(info, tab) {
