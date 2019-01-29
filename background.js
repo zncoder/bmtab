@@ -13,18 +13,28 @@ function captureTab() {
 		{currentWindow: true, active: true},
 		tabs => {
 			let tab = tabs[0];
-			let u = tab.url;
-			if (!u.startsWith("https://") && !u.startsWith("http://") && !u.startsWith("file://")) {
-				// don't capture special pages
+			if (specialPage(tab.url)) {
 				return;
 			}
-			let arg = {parentId: folderId, index: 0, title: tab.title, url: u};
+			let arg = {parentId: folderId, index: 0, title: tab.title, url: tab.url};
 			bmDo("create", arg)
 				.then(item => {
 					chrome.tabs.remove(tab.id);
 					buildMenus();
 				});
 		});
+}
+
+function specialPage(url) {
+	return !url.startsWith("https://") && !url.startsWith("http://") && !url.startsWith("file://")
+}
+
+function restoreTab(tab, url) {
+	if (specialPage(tab.url)) {
+		chrome.tabs.update(tab.id, {url: url});
+	} else {
+		chrome.tabs.create({url: url, active: true});
+	}
 }
 
 function initBmtab() {
@@ -121,7 +131,7 @@ function handleMenu(info, tab) {
 			}
 			let it = items[id];
 			//console.log("show item:" + it.id + ",url:" + it.url);
-			chrome.tabs.update(tab.id, {url: it.url});
+			restoreTab(tab, it.url);
 			return removeBookmark(it.id);
 		})
 		.then(buildMenus);

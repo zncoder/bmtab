@@ -9,7 +9,7 @@ function deleteEntry(id) {
 }
 
 const liTmpl = '<li id="li-{id}">\n\
-  <span class="close-sym" id="span-{id}">&nbsp;&times </span>&nbsp;<a id="a-{id}" href="{url}">{title}</a>\n\
+  <span class="close-sym" id="span-{id}">&nbsp;&times </span>&nbsp;<a id="a-{id}" href="{url}" target="_blank" rel="noopener noreferrer">{title}</a>\n\
 </li>\n';
 
 function displayEntries(items) {
