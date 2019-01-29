@@ -8,17 +8,17 @@ function showBmtabPage() {
 	chrome.tabs.create({"url": "/page.html"});
 }
 
-function bmTab() {
+function captureTab() {
 	chrome.tabs.query(
 		{currentWindow: true, active: true},
 		tabs => {
 			let tab = tabs[0];
 			let arg = {parentId: folderId, index: 0, title: tab.title, url: tab.url};
-			chrome.bookmarks.create(arg, item => {
-				//console.log("remove tab:" + tab.id);
-				chrome.tabs.remove(tab.id);
-				buildMenus();
-			});
+			bmDo("create", arg)
+				.then(item => {
+					chrome.tabs.remove(tab.id);
+					buildMenus();
+				});
 		});
 }
 
@@ -33,49 +33,34 @@ function initBmtab() {
 }
 
 function createBmtabFolder() {
-	return new Promise(resolve => {
-		chrome.bookmarks.search(
-			{title: bmtabTitle},
-			items => {
-				if (items.length > 0) {
-					resolve(items[0].id);
-					return;
-				}
-				
-				chrome.bookmarks.create(
-					{title: bmtabTitle},
-					item => resolve(item.id));
-			});
-	});
+	return bmDo("search", {title: bmtabTitle})
+		.then(items => {
+			if (items.length > 0) {
+				return items[0];
+			}
+			return bmDo("create", {title: bmtabTitle});
+		})
+		.then(item => item.id);
 }
 
 function createHistoryFolder() {
-	return new Promise(resolve => {
-		chrome.bookmarks.getChildren(
-			folderId,
-			items => {
-				for (let x of items) {
-					if (x.title === historyTitle) {
-						resolve(x.id);
-						return;
-					}
+	return bmDo("getChildren", folderId)
+		.then(items => {
+			for (let x of items) {
+				if (x.title === historyTitle) {
+					return x;
 				}
+			}
 
-				chrome.bookmarks.create(
-					{
-						title: historyTitle,
-						parentId: folderId
-					},
-					item => resolve(item.id));
-			});
-	});
+			let arg = {title: historyTitle, parentId: folderId};
+			return bmDo("create", arg);
+		})
+		.then(item => item.id);
 }
 
 function getBmtabs() {
-	return new Promise(resolve => chrome.bookmarks.getChildren(folderId, items => {
-		items = items.filter(x => x.id !== historyId);
-		resolve(items);
-	}));
+	return bmDo("getChildren", folderId)
+		.then(items => items.filter(x => x.id !== historyId));
 }
 
 function removeMenus() {
@@ -91,20 +76,16 @@ function newMenu(arg) {
 }
 
 function removeBookmark(id) {
-	return new Promise(resolve => {
-		// move id to history
-		chrome.bookmarks.get(id, items => {
+	return bmDo("get", id)
+		.then(items => {
 			if (items.length == 0) {
-				resolve();
 				return;
 			}
 			
 			let arg = {parentId: historyId, index: 0, title: items[0].title, url: items[0].url}
-			chrome.bookmarks.create(arg, () => {
-				chrome.bookmarks.remove(id, () => resolve());
-			});
+			return bmDo("create", arg)
+				.then(() => bmDo("remove", id));
 		});
-	});
 }
 
 function handleMenu(info, tab) {
@@ -167,10 +148,35 @@ function handleMessage(req, sender, sendResponse) {
 	}
 }
 
+function bmDo(name, arg) {
+	return new Promise((resolve, reject) => {
+		switch (name) {
+		case "create":
+			chrome.bookmarks.create(arg, x => resolve(x));
+			break;
+		case "search":
+			chrome.bookmarks.search(arg, x => resolve(x));
+			break;
+		case "getChildren":
+			chrome.bookmarks.getChildren(arg, x => resolve(x));
+			break;
+		case "get":
+			chrome.bookmarks.get(arg, x => resolve(x));
+			break;
+		case "remove":
+			chrome.bookmarks.remove(arg, x => resolve(x));
+			break;
+		default:
+			reject("unknown bookmarks function:" + name)
+			return;
+		}
+	});
+}
+
 initBmtab();
 
 chrome.contextMenus.onClicked.addListener(handleMenu);
 buildMenus();
 
-chrome.browserAction.onClicked.addListener(bmTab);
+chrome.browserAction.onClicked.addListener(captureTab);
 chrome.runtime.onMessage.addListener(handleMessage);
