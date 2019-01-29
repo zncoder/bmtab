@@ -13,7 +13,12 @@ function captureTab() {
 		{currentWindow: true, active: true},
 		tabs => {
 			let tab = tabs[0];
-			let arg = {parentId: folderId, index: 0, title: tab.title, url: tab.url};
+			let u = tab.url;
+			if (!u.startsWith("https://") && !u.startsWith("http://") && !u.startsWith("file://")) {
+				// don't capture special pages
+				return;
+			}
+			let arg = {parentId: folderId, index: 0, title: tab.title, url: u};
 			bmDo("create", arg)
 				.then(item => {
 					chrome.tabs.remove(tab.id);
