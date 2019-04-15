@@ -5,10 +5,11 @@ function showItems(items) {
 	tb.id = "item_tb"
 	for (let it of items) {
 		let tr = document.createElement("tr")
-		tr.innerHTML = `<td class="link">${it.title}</td>`
+		let favicon = faviconUrl(it.url)
+		tr.innerHTML = `<td><img src="${favicon}" width="14" height="14"></td>` +
+			`<td class="link">${it.title}</td>`
 		let td = tr.querySelector("td")
 		td.addEventListener("click", () => gotoItem(it.id, it.url))
-		status(td, it.url)
 		tb.appendChild(tr)
 	}
 
@@ -21,28 +22,27 @@ function gotoItem(id, url) {
 	window.close()
 }
 
+function faviconUrl(url) {
+	let a = document.createElement("a")
+	a.href = url
+	a.pathname = "favicon.ico"
+	return a.href
+}
+
 function init() {
 	let el = document.querySelector("#capture_btn")
 	el.addEventListener("click", () => {
 		bg.captureTab()
 		window.close()
 	})
-	status(el, "save page in bmtab")
 
 	el = document.querySelector("#page_btn")
 	el.addEventListener("click", () => {
 		bg.showBmtabPage()
 		window.close()
 	})
-	status(el, "show bmtab page")
 	
 	bg.getBmtabs().then(showItems)
-}
-
-function status(el, s) {
-	let sb = document.querySelector("#status_box")
-	el.addEventListener("mouseover", () => sb.innerText = s)
-	el.addEventListener("mouseout", () => sb.innerText = "")
 }
 
 chrome.runtime.getBackgroundPage(x => {
