@@ -7,14 +7,18 @@
 
 	<body>
 		<div class="row">
-			<input type="image" id="page_btn" src="icons/page.svg" class="cell link">
-			<input type="image" id="capture_btn" src="icons/add.svg" class="cell link">
+			<div class="cell link" id="page_btn">
+				<div class="inner_row">
+					<img src="icons/page.svg" width="24" height="24" /><span class="text_sp">&nbsp;List</span>
+				</div>
+			</div>
+			<div class="cell link" id="capture_btn">
+				<div class="inner_row">
+					<img src="icons/add.svg" width="24" height="24" /><span class="text_sp">&nbsp;Clip</span>
+				</div>
+			</div>
 		</div>
-		<ul id="item_sec"></ul>
-		<div>
-			<span class="status_left">&nbsp;</span>
-			<span class="status_right">&nbsp;</span>
-			<span id="status_box"></span>
+		<div id="item_sec">
 		</div>
 
 		<script src="popup.js"></script>
