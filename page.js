@@ -1,37 +1,32 @@
-let bg;
-let sel = x => document.querySelector(x);
+let bg
+let sel = x => document.querySelector(x)
 
 function deleteEntry(id) {
-	let li = sel("#li-"+id);
-	li.parentNode.removeChild(li);
-	bg.removeBookmark(id);
-	chrome.runtime.sendMessage({action: "bm-removed"});
+	let li = sel(`#li-${id}`)
+	li.parentNode.removeChild(li)
+	bg.removeBookmark(id)
 }
 
-const liTmpl = '<li id="li-{id}">\n\
-  <span class="close-sym" id="span-{id}">&nbsp;&times </span>&nbsp;<a id="a-{id}" href="{url}" target="_blank" rel="noopener noreferrer">{title}</a>\n\
-</li>\n';
-
 function displayEntries(items) {
-	let list = "";
+	let ul = sel("#bookmark-sec")
 	for (let it of items) {
-		list += liTmpl
-			.replace(/{id}/g, it.id)
-			.replace(/{url}/g, it.url)
-			.replace(/{title}/g, it.title);
+		let s = `<span class="close-sym" id="span-${it.id}">&nbsp;&times </span>&nbsp;` + 
+				`<a id="a-${it.id}" href="${it.url}" target="_blank" rel="noopener noreferrer">${it.title}</a>`
+		let li = document.createElement("li")
+		li.id= `li-${it.id}`
+		li.innerHTML = s
+		ul.appendChild(li)
 	}
 	
-	let ul = sel("#bookmark-sec");
-	ul.innerHTML = list;
-
 	for (let it of items) {
-		let cb = () => {deleteEntry(it.id)};
-		sel("#span-"+it.id).addEventListener("click", cb);
-		sel("#a-"+it.id).addEventListener("click", cb);
+		let id = it.id
+		let cb = () => deleteEntry(id)
+		sel(`#span-${id}`).addEventListener("click", cb)
+		sel(`#a-${id}`).addEventListener("click", cb)
 	}
 }
 
 chrome.runtime.getBackgroundPage(x => {
-	bg = x;
-	bg.getBmtabs().then(displayEntries);
-});
+	bg = x
+	bg.getBmtabs().then(displayEntries)
+})

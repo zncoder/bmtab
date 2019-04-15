@@ -1,0 +1,57 @@
+body {
+		width: 200px;
+}
+
+input[type=button] {
+		border: 0px;
+		background-color: lightskyblue;
+		border-radius: 6px;
+		margin: 2px;
+		font-size: 1em;
+}
+
+#item_sec {
+		border-top: thin solid;
+		border-bottom: thin solid;
+		margin: 0.5em auto 0.5em auto;
+		padding: 0.5em;
+    list-style: none;
+    padding-left: 0;
+}
+
+#item_sec li:nth-child(2n) {
+		background: cyan;
+}
+
+#item_sec a {
+		text-decoration: none;
+		color: black;
+}
+
+.row {
+		display: flex;
+}
+
+.cell {
+		flex: 1;
+}
+
+.status_left {
+    float: left;
+}
+
+.status_right {
+    float: right;
+}
+
+#status_box {
+		overflow: hidden;
+    position: relative;
+		display: block;
+		font-size: 0.8em;
+}
+
+.link:hover {
+		background-color: lightskyblue !important;
+		cursor: default;
+}
