@@ -8,7 +8,7 @@ function showItems(items) {
 		let favicon = faviconUrl(it.url)
 		tr.innerHTML = `<td><img src="${favicon}" width="14" height="14"></td>` +
 			`<td class="link">${it.title}</td>`
-		let td = tr.querySelector("td")
+		let td = tr.querySelector(".link")
 		td.addEventListener("click", () => gotoItem(it.id, it.url))
 		tb.appendChild(tr)
 	}
