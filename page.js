@@ -5,6 +5,7 @@ function deleteEntry(id) {
 	let li = sel(`#li-${id}`)
 	li.parentNode.removeChild(li)
 	bg.removeBookmark(id)
+	chrome.runtime.sendMessage({action: "bm-removed"})
 }
 
 function displayEntries(items) {
