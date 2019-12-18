@@ -133,9 +133,9 @@ async function buildMenus() {
 	chrome.browserAction.setBadgeText({text: badgeText(items.length)})
 	
 	let max = items.length
-	let title = "▶ BmTab Page ▶"
+	let title = "▸ BmTab Page ▸"
 	if (max - 1 > chrome.contextMenus.ACTION_MENU_TOP_LEVEL_LIMIT) {
-		title = "▶ BmTab Page [...] ▶"
+		title = "▸ BmTab Page [...] ▸"
 		max = chrome.contextMenus.ACTION_MENU_TOP_LEVEL_LIMIT - 1
 	}
 
