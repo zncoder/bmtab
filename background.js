@@ -130,11 +130,13 @@ async function buildMenus() {
 	
 	let items = await getBmtabs()
 	//console.log("buildmenus items"); console.log(items)
+	chrome.browserAction.setBadgeText({text: badgeText(items.length)})
+	
 	let max = items.length
-	let title = "* Bmtab Page *"
+	let title = "▶ BmTab Page ▶"
 	if (max - 1 > chrome.contextMenus.ACTION_MENU_TOP_LEVEL_LIMIT) {
+		title = "▶ BmTab Page [...] ▶"
 		max = chrome.contextMenus.ACTION_MENU_TOP_LEVEL_LIMIT - 1
-		title = "* Bmtab Page [...] *"
 	}
 
 	let ps = []
@@ -143,6 +145,15 @@ async function buildMenus() {
 		ps.push(newMenu({id: menuIdBase + i + "", title: items[i].title}))
 	}
 	return Promise.all(ps)
+}
+
+function badgeText(n) {
+	if (n == 0) {
+		return ""
+	} else if (n > 9999) {
+		return "..."
+	}
+	return n+""
 }
 
 function handleMessage(req, sender, sendResponse) {
