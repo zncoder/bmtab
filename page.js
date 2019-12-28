@@ -1,15 +1,19 @@
 let bg
-let sel = x => document.querySelector(x)
 
-function deleteEntry(id) {
-	let li = sel(`#li-${id}`)
+async function deleteEntry(ev) {
+	let sid = ev.target.id
+	if (!sid.startsWith("a-") && !sid.startsWith("span-")) {
+		throw new Error(`entry id:${sid} invalid`)
+	}
+	let id = sid.substring(sid.indexOf("-")+1)
+	let li = document.querySelector(`#li-${id}`)
 	li.parentNode.removeChild(li)
-	bg.removeBookmark(id)
-	chrome.runtime.sendMessage({action: "bm-removed"})
+	await bg.removeBookmark(id)
+	return bg.buildMenus()
 }
 
 function displayEntries(items) {
-	let ul = sel("#bookmark-sec")
+	let ul = document.querySelector("#bookmark-sec")
 	for (let it of items) {
 		let s = `<span class="close-sym" id="span-${it.id}">&nbsp;&times </span>&nbsp;` + 
 				`<a id="a-${it.id}" href="${it.url}" target="_blank" rel="noopener noreferrer">${it.title}</a>`
@@ -21,13 +25,15 @@ function displayEntries(items) {
 	
 	for (let it of items) {
 		let id = it.id
-		let cb = () => deleteEntry(id)
-		sel(`#span-${id}`).addEventListener("click", cb)
-		sel(`#a-${id}`).addEventListener("click", cb)
+		document.querySelector(`#span-${id}`).addEventListener("click", deleteEntry)
+		document.querySelector(`#a-${id}`).addEventListener("click", deleteEntry)
 	}
 }
 
-chrome.runtime.getBackgroundPage(x => {
-	bg = x
-	bg.getBmtabs().then(displayEntries)
-})
+async function init() {
+	bg = await new Promise(resolve => chrome.runtime.getBackgroundPage(x => resolve(x)))
+	let items = await bg.getBmtabs()
+	displayEntries(items)
+}
+
+init()
